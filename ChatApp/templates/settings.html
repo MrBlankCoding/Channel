@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-2xl mx-auto">
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+            <div class="px-8 py-6 border-b border-gray-100">
+                <h1 class="text-2xl font-bold text-gray-900">Account Settings</h1>
+            </div>
+
+            <div class="px-8 py-6">
+                <form method="POST" enctype="multipart/form-data" class="space-y-6">
+                    <!-- Profile Photo Section -->
+                    <div class="space-y-4">
+                        <label class="block text-sm font-medium text-gray-700">Profile Photo</label>
+                        <div class="flex items-center space-x-6">
+                            <div class="shrink-0">
+                                {% if user_data.get('profile_photo') %}
+                                    <img class="h-16 w-16 object-cover rounded-full" 
+                                         src="{{ url_for('profile_photo', filename=user_data.profile_photo) }}" 
+                                         alt="Current profile photo">
+                                {% else %}
+                                    <div class="h-16 w-16 rounded-full bg-gray-200 flex items-center justify-center">
+                                        <span class="text-gray-500 text-xl">{{ session.username[0].upper() }}</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-1">
+                                <input type="file" 
+                                       name="profile_photo" 
+                                       accept="image/*"
+                                       class="block w-full text-sm text-gray-500
+                                              file:mr-4 file:py-2 file:px-4
+                                              file:rounded-full file:border-0
+                                              file:text-sm file:font-semibold
+                                              file:bg-indigo-50 file:text-indigo-700
+                                              hover:file:bg-indigo-100">
+                                <p class="mt-1 text-sm text-gray-500">PNG, JPG, GIF up to 5MB</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Existing Fields -->
+                    <div>
+                        <label for="new_username" class="block text-sm font-medium text-gray-700">New Username</label>
+                        <div class="mt-1">
+                            <input type="text" name="new_username" id="new_username"
+                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="current_password" class="block text-sm font-medium text-gray-700">Current Password</label>
+                        <div class="mt-1">
+                            <input type="password" name="current_password" id="current_password"
+                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="new_password" class="block text-sm font-medium text-gray-700">New Password</label>
+                        <div class="mt-1">
+                            <input type="password" name="new_password" id="new_password"
+                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label for="confirm_new_password" class="block text-sm font-medium text-gray-700">Confirm New Password</label>
+                        <div class="mt-1">
+                            <input type="password" name="confirm_new_password" id="confirm_new_password"
+                                   class="block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit"
+                                class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
+                            Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,15 @@
+1. Make it so the join room button works
+3. Make the homepage have more features like sign-out and settings
+4. Increase the UI of chatrooms themselves 
+5. Make it so you can themify the whole thing
+6. Add an actual homepage for it based on the Salem witch trials: the donate button leads to signing
+7. Make the reply button work
+8. Add rate limiting
+10. Add profile photos 
+11. Use mongo DB for long time storage
+12. Optamise message fetching
+13. Make the members show correctly
+15. Add regular and push notfications
+16. Anything else I think of
+17. CRSF PROTECTION
+18. Make it so when you click on the join room button you actually join the room

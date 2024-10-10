@@ -1,0 +1,7 @@
+flask
+flask-socketio 
+redis 
+Werkzeug
+requests
+Pillow
+Flask-WTF

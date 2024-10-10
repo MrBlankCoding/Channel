@@ -1,0 +1,626 @@
+{% extends 'base.html' %} 
+{% block content %}
+<div class="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 py-12 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-7xl mx-auto">
+    <!-- Header Section -->
+    <div class="mb-8 bg-white rounded-2xl shadow-lg overflow-hidden">
+      <div class="px-6 py-5 border-b border-gray-100">
+        <div class="flex justify-between items-center">
+          <div class="flex items-center space-x-4">
+            <div class="h-12 w-12 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white text-lg font-bold shadow-md">
+              {{ username[0]|upper }}
+            </div>
+            <div>
+              <h1 class="text-2xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">
+                Welcome back
+              </h1>
+              <p class="text-gray-600">{{ username }}</p>
+            </div>
+          </div>
+          <div class="flex items-center divide-x divide-gray-200">
+            <div class="bg-indigo-50 px-4 py-2 rounded-l-lg">
+              <span class="text-indigo-600 font-medium">{{ user_data.get('rooms', [])|length }} Rooms</span>
+            </div>
+            <div class="bg-purple-50 px-4 py-2 rounded-r-lg">
+              <span class="text-purple-600 font-medium">{{ friends|length }} Friends</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <!-- Left Column: Room Management -->
+      <div class="lg:col-span-2 space-y-8">
+        <!-- Create/Join Room Section with Tabs -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <div class="flex space-x-4" role="tablist">
+              <button class="px-4 py-2 text-sm font-medium rounded-lg focus:outline-none tab-active" 
+                      id="join-tab" 
+                      onclick="switchTab('join')">
+                Join Room
+              </button>
+              <button class="px-4 py-2 text-sm font-medium rounded-lg focus:outline-none" 
+                      id="create-tab" 
+                      onclick="switchTab('create')">
+                Create Room
+              </button>
+            </div>
+          </div>
+          <div class="p-6">
+            <!-- Join Room Tab -->
+            <div id="join-content" class="tab-content">
+              <form method="POST" class="space-y-4">
+                <div>
+                  <label for="code" class="block text-sm font-medium text-gray-700">Room Code</label>
+                  <input type="text" name="code" id="code" 
+                         class="mt-1 block w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                         placeholder="Enter room code to join">
+                </div>
+                <button type="submit" name="join" value="true"
+                        class="w-full px-6 py-3 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 shadow-md hover:shadow-lg">
+                  Join Room
+                </button>
+              </form>
+            </div>
+            <!-- Create Room Tab -->
+            <div id="create-content" class="tab-content hidden">
+              <form method="POST" class="space-y-4">
+                <div>
+                  <label for="room_name" class="block text-sm font-medium text-gray-700">Room Name (Optional)</label>
+                  <input type="text" name="room_name" id="room_name" 
+                         class="mt-1 block w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                         placeholder="Enter a name for your room">
+                </div>
+                <button type="submit" name="create" value="true"
+                        class="w-full px-6 py-3 bg-gradient-to-r from-purple-500 to-pink-500 text-white font-medium rounded-lg hover:from-purple-600 hover:to-pink-600 transition-all duration-200 shadow-md hover:shadow-lg">
+                  Create New Room
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Your Rooms Section -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <h2 class="text-xl font-semibold text-gray-900">Your Rooms</h2>
+          </div>
+          <div class="p-6">
+            {% if user_data.get('rooms') %}
+            <div class="grid gap-4">
+              {% for room_code in user_data.get('rooms') %}
+              {% set room_data = get_room_data(room_code) %}
+              {% if room_data %}
+              <div class="group hover:bg-gray-50 rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-200 hover:shadow-md">
+                <div class="flex items-center justify-between p-5">
+                  <div class="flex items-center space-x-4">
+                    <div class="h-10 w-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium shadow-sm">
+                      {{ room_code[:2] }}
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="font-medium text-gray-900">Room: {{ room_code }}</span>
+                      <div class="flex items-center space-x-2 text-sm text-gray-500">
+                        <span>Created by: {{ room_data.created_by }}</span>
+                        <span>•</span>
+                        <span>{{ room_data.get('members', 0) }} members</span>
+                        <span>•</span>
+                        <span class="text-gray-400">Created {{ room_data.get('created_at', '') }}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <a href="{{ url_for('room', code=room_code) }}" 
+                       class="px-4 py-2 bg-gradient-to-r from-indigo-500 to-purple-500 text-white font-medium rounded-lg hover:from-indigo-600 hover:to-purple-600 transition-all duration-200 shadow-sm hover:shadow-md">
+                      Join Room
+                    </a>
+                    {% if room_data.created_by == username %}
+                    <button onclick="confirmDeleteRoom('{{ room_code }}')"
+                            class="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white font-medium rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 shadow-sm hover:shadow-md">
+                      Delete
+                    </button>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+              {% endif %}
+              {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-16 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+              <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                      d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h14a2 2 0 012 2v14a2 2 0 01-2 2z M12 11v4 M15 13h-6">
+                </path>
+              </svg>
+              <h3 class="mt-4 text-lg font-medium text-gray-900">No rooms yet</h3>
+              <p class="mt-2 text-gray-500">Create or join a room to start chatting!</p>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Friends Management -->
+      <div class="space-y-8">
+        <!-- Friends Management Tabs -->
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <div class="px-6 py-4 border-b border-gray-100">
+            <div class="flex space-x-4" role="tablist">
+              <button class="px-4 py-2 text-sm font-medium rounded-lg focus:outline-none friends-tab-active" 
+                      id="friends-list-tab" 
+                      onclick="switchFriendsTab('friends-list')">
+                Friends
+              </button>
+              <button class="px-4 py-2 text-sm font-medium rounded-lg focus:outline-none" 
+                      id="add-friend-tab" 
+                      onclick="switchFriendsTab('add-friend')">
+                Add Friend
+              </button>
+              {% if friend_requests %}
+              <button class="px-4 py-2 text-sm font-medium rounded-lg focus:outline-none relative" 
+                      id="requests-tab" 
+                      onclick="switchFriendsTab('requests')">
+                Requests
+                <span class="absolute -top-1 -right-1 h-5 w-5 bg-red-500 rounded-full text-white text-xs flex items-center justify-center">
+                  {{ friend_requests|length }}
+                </span>
+              </button>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="p-6">
+            <!-- Friends List Tab -->
+            <div id="friends-list-content" class="friends-tab-content">
+              {% if friends %}
+              <div class="mb-4">
+                <input type="text" 
+                       id="friends-search" 
+                       placeholder="Search friends..." 
+                       class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent">
+              </div>
+              <div class="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
+                {% for friend in friends %}
+                <div class="friend-item group hover:bg-gray-50 rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-200">
+                  <div class="flex items-center justify-between p-4">
+                    <div class="flex items-center space-x-4">
+                      <div class="relative">
+                        <div class="h-10 w-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium shadow-sm">
+                          {{ friend.username[0]|upper }}
+                        </div>
+                        <div class="absolute -bottom-1 -right-1 h-5 w-5 rounded-full border-2 border-white shadow-sm
+                          {{ 'bg-green-400 online-pulse' if friend.online else 'bg-gray-400' }}">
+                        </div>
+                      </div>
+                      <div class="flex flex-col">
+                        <span class="friend-name font-medium text-gray-900">{{ friend.username }}</span>
+                        <span class="text-sm {{ 'text-green-500 font-medium' if friend.online else 'text-gray-500' }}">
+                          {% if friend.online %}
+                            {% if friend.current_room and friend.current_room in user_data.get('rooms', []) %}
+                              In Room: {{ friend.current_room }}
+                            {% else %}
+                              Online
+                            {% endif %}
+                          {% else %}
+                            Offline
+                          {% endif %}
+                        </span>
+                      </div>
+                    </div>
+                    <button 
+                    onclick="showConfirmationModal('{{ friend.username }}')"
+                    data-friend-username="{{ friend.username }}"
+                    class="text-red-500 hover:text-red-600 transition-colors duration-200"
+                >
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </button>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+              {% else %}
+              <div class="text-center py-16 bg-gray-50 rounded-xl border border-dashed border-gray-200">
+                <svg class="mx-auto h-16 w-16 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" 
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z">
+                  </path>
+                </svg>
+                <h3 class="mt-4 text-lg font-medium text-gray-900">No friends yet</h3>
+                <p class="mt-2 text-gray-500">Start building your network by adding some friends!</p>
+              </div>
+              {% endif %}
+            </div>
+
+            <!-- Add Friend Tab -->
+            <div id="add-friend-content" class="friends-tab-content hidden">
+              <form method="POST" class="space-y-4">
+                <div>
+                  <label for="friend_username" class="block text-sm font-medium text-gray-700">Username</label>
+                  <input type="text" name="friend_username" id="friend_username"
+                         class="mt-1 block w-full px-4 py-3 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all duration-200"
+                         placeholder="Enter username to add">
+                </div>
+                <button type="submit"
+                        class="w-full px-6 py-3 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-md hover:shadow-lg">
+                  Send Friend Request
+                </button>
+              </form>
+            </div>
+
+            <!-- Friend Requests Tab -->
+            {% if friend_requests %}
+            <div id="requests-content" class="friends-tab-content hidden">
+              <div class="space-y-4">
+                {% for request in friend_requests %}
+                <div class="flex items-center justify-between p-4 bg-gray-50 rounded-xl border border-gray-200 shadow-sm">
+                  <div class="flex items-center space-x-4">
+                    <div class="h-12 w-12 rounded-full bg-gradient-to-r from-purple-500 to-pink-500 flex items-center justify-center text-white font-medium shadow-sm">
+                      {{ request[0]|upper }}
+                    </div>
+                    <span class="font-medium text-gray-900">{{ request }}</span>
+                  </div>
+                  <div class="flex space-x-3">
+                    <a href="{{ url_for('accept_friend', username=request) }}"
+                       class="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-sm hover:shadow-md">
+                      Accept
+                    </a>
+                    <a href="{{ url_for('decline_friend', username=request) }}"
+                       class="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white font-medium rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 shadow-sm hover:shadow-md">
+                      Decline
+                    </a>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Room Invites Section (Collapsed by default) -->
+        {% if user_data.get('room_invites') %}
+        <div class="bg-white rounded-2xl shadow-lg overflow-hidden">
+          <button onclick="toggleRoomInvites()" 
+                  class="w-full px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+            <h2 class="text-xl font-semibold text-gray-900">Room Invites</h2>
+            <span class="bg-red-500 text-white text-xs font-medium px-2.5 py-1 rounded-full">
+              {{ user_data.get('room_invites')|length }}
+            </span>
+          </button>
+          <div id="roomInvitesContent" class="hidden">
+            <div class="p-6 space-y-4">
+              {% for invite in user_data.get('room_invites') %}
+              <div class="group hover:bg-gray-50 rounded-xl border border-gray-200 shadow-sm overflow-hidden transition-all duration-200">
+                <div class="flex items-center justify-between p-4">
+                  <div class="flex items-center space-x-4">
+                    <div class="h-10 w-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500 flex items-center justify-center text-white font-medium shadow-sm">
+                      {{ invite.room[:2] }}
+                    </div>
+                    <div class="flex flex-col">
+                      <span class="font-medium text-gray-900">Room: {{ invite.room }}</span>
+                      <span class="text-sm text-gray-500">Invited by: {{ invite.from }}</span>
+                    </div>
+                  </div>
+                  <div class="flex items-center space-x-3">
+                    <a href="{{ url_for('accept_room_invite', room_code=invite.room) }}" 
+                       class="px-4 py-2 bg-gradient-to-r from-green-500 to-emerald-500 text-white font-medium rounded-lg hover:from-green-600 hover:to-emerald-600 transition-all duration-200 shadow-sm hover:shadow-md">
+                      Accept
+                    </a>
+                    <a href="{{ url_for('decline_room_invite', room_code=invite.room) }}"
+                       class="px-4 py-2 bg-gradient-to-r from-red-500 to-pink-500 text-white font-medium rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 shadow-sm hover:shadow-md">
+                      Decline
+                    </a>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmationModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+    <h3 class="text-2xl font-semibold mb-4">Confirm Action</h3>
+    <p class="text-gray-600 text-lg mb-8">Are you sure you want to remove this friend?</p>
+    <div class="flex justify-end space-x-4">
+      <button onclick="hideConfirmationModal()" 
+              class="px-6 py-3 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 transition-all duration-200 text-lg">
+        Cancel
+      </button>
+      <button id="confirmDelete"
+              class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white font-medium rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 shadow-md hover:shadow-lg text-lg">
+        Remove
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Room Delete Confirmation Modal -->
+<div id="roomDeleteModal" class="fixed inset-0 bg-black bg-opacity-50 hidden items-center justify-center z-50">
+  <div class="bg-white rounded-xl p-8 max-w-md w-full mx-4">
+    <h3 class="text-2xl font-semibold mb-4">Delete Room</h3>
+    <p class="text-gray-600 text-lg mb-8">Are you sure you want to delete this room? This action cannot be undone.</p>
+    <div class="flex justify-end space-x-4">
+      <button onclick="hideRoomDeleteModal()" 
+              class="px-6 py-3 bg-gray-200 text-gray-800 font-medium rounded-lg hover:bg-gray-300 transition-all duration-200 text-lg">
+        Cancel
+      </button>
+      <a id="confirmRoomDelete" href="#"
+         class="px-6 py-3 bg-gradient-to-r from-red-500 to-pink-500 text-white font-medium rounded-lg hover:from-red-600 hover:to-pink-600 transition-all duration-200 shadow-md hover:shadow-lg text-lg text-center">
+        Delete Room
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Flash Messages -->
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+<div class="fixed bottom-4 right-4 z-50">
+  {% for message in messages %}
+  <div class="bg-white border-l-4 border-green-500 rounded-lg shadow-lg p-4 mb-4 animate-fade-in flex items-center justify-between">
+    <div class="flex items-center">
+      <svg class="h-5 w-5 text-green-500 mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+      </svg>
+      <span class="text-gray-800">{{ message }}</span>
+    </div>
+    <button onclick="this.parentElement.remove()" class="ml-4 text-gray-400 hover:text-gray-600">
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+      </svg>
+    </button>
+  </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endwith %}
+
+<!-- Custom Styles -->
+<style>
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background-color: #f1f1f1;
+    border-radius: 3px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #888;
+    border-radius: 3px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: #555;
+  }
+  .online-pulse {
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0% {
+      box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.4);
+    }
+    70% {
+      box-shadow: 0 0 0 10px rgba(74, 222, 128, 0);
+    }
+    100% {
+      box-shadow: 0 0 0 0 rgba(74, 222, 128, 0);
+    }
+  }
+  .animate-fade-in {
+    animation: fadeIn 0.3s ease-in-out;
+  }
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  .tab-active, .friends-tab-active {
+    background: linear-gradient(to right, rgb(99, 102, 241), rgb(168, 85, 247));
+    color: white;
+  }
+  @media (max-width: 640px) {
+    .fixed.bottom-4.right-4 {
+      bottom: 72px;
+    }
+  }
+</style>
+
+<!-- Scripts -->
+<script>
+  let friendToRemove = null;
+  let roomToDelete = null;
+  
+  // Tab Switching Logic
+  function switchTab(tab) {
+    document.querySelectorAll('[id$="-tab"]').forEach(el => {
+      el.classList.remove('tab-active');
+    });
+    document.querySelectorAll('.tab-content').forEach(el => {
+      el.classList.add('hidden');
+    });
+    document.getElementById(`${tab}-tab`).classList.add('tab-active');
+    document.getElementById(`${tab}-content`).classList.remove('hidden');
+  }
+
+  function switchFriendsTab(tab) {
+    document.querySelectorAll('[id$="-tab"]').forEach(el => {
+      el.classList.remove('friends-tab-active');
+    });
+    document.querySelectorAll('.friends-tab-content').forEach(el => {
+      el.classList.add('hidden');
+    });
+    document.getElementById(`${tab}-tab`).classList.add('friends-tab-active');
+    document.getElementById(`${tab}-content`).classList.remove('hidden');
+  }
+
+  // Friend Management
+  function removeFriend(username) {
+    friendToRemove = username;
+    showConfirmationModal();
+  }
+  
+// Function to show the confirmation modal
+function showConfirmationModal(username) {
+   const modal = document.getElementById('confirmationModal');
+   const confirmBtn = modal.querySelector('#confirmDelete');
+   const cancelBtn = modal.querySelector('button:first-of-type');
+   
+   // Show the modal
+   modal.classList.remove('hidden');
+   modal.classList.add('flex');
+   
+   // Handle confirm action
+   const handleConfirm = async () => {
+       try {
+           const response = await fetch(`/remove_friend/${username}`, {
+               method: 'POST',
+               headers: {
+                   'Content-Type': 'application/json',
+                   // Include CSRF token if you're using Flask-WTF
+                   'X-CSRFToken': document.querySelector('meta[name="csrf-token"]')?.content
+               }
+           });
+           
+           if (!response.ok) {
+               throw new Error('Failed to remove friend');
+           }
+           
+           // If successful, remove the friend element from the DOM
+           const friendElement = document.querySelector(`[data-friend-username="${username}"]`);
+           if (friendElement) {
+               friendElement.remove();
+           }
+           
+           // Optionally show a success message
+           showNotification('Friend removed successfully');
+           
+       } catch (error) {
+           console.error('Error removing friend:', error);
+           showNotification('Failed to remove friend', 'error');
+       } finally {
+           // Hide the modal
+           hideModal();
+       }
+   };
+   
+   // Handle cancel action
+   const handleCancel = () => {
+       hideModal();
+   };
+   
+   // Remove existing event listeners to prevent duplicates
+   confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+   cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+   
+   // Add new event listeners
+   modal.querySelector('#confirmDelete').addEventListener('click', handleConfirm);
+   modal.querySelector('button:first-of-type').addEventListener('click', handleCancel);
+}
+
+// Function to hide the modal
+function hideModal() {
+   const modal = document.getElementById('confirmationModal');
+   modal.classList.remove('flex');
+   modal.classList.add('hidden');
+}
+
+// Helper function to show notifications
+function showNotification(message, type = 'success') {
+   const notificationContainer = document.createElement('div');
+   notificationContainer.className = `fixed bottom-4 right-4 z-50 bg-white border-l-4 ${
+       type === 'success' ? 'border-green-500' : 'border-red-500'
+   } rounded-lg shadow-lg p-4 mb-4 animate-fade-in flex items-center justify-between`;
+   
+   notificationContainer.innerHTML = `
+       <div class="flex items-center">
+           <svg class="h-5 w-5 ${type === 'success' ? 'text-green-500' : 'text-red-500'} mr-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+               ${
+                   type === 'success'
+                       ? '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />'
+                       : '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />'
+               }
+           </svg>
+           <span class="text-gray-800">${message}</span>
+       </div>
+   `;
+   
+   document.body.appendChild(notificationContainer);
+   
+   // Remove notification after 3 seconds
+   setTimeout(() => {
+       notificationContainer.remove();
+   }, 3000);
+}
+
+  // Room Management
+  function confirmDeleteRoom(roomCode) {
+    roomToDelete = roomCode;
+    showRoomDeleteModal();
+  }
+
+  function showRoomDeleteModal() {
+    const modal = document.getElementById('roomDeleteModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
+    document.getElementById('confirmRoomDelete').href = `/delete_room/${roomToDelete}`;
+  }
+
+  function hideRoomDeleteModal() {
+    const modal = document.getElementById('roomDeleteModal');
+    modal.classList.add('hidden');
+    modal.classList.remove('flex');
+    roomToDelete = null;
+  }
+
+  // Room Invites Toggle
+  function toggleRoomInvites() {
+    const content = document.getElementById('roomInvitesContent');
+    content.classList.toggle('hidden');
+  }
+
+  // Friends Search
+  document.getElementById('friends-search')?.addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    document.querySelectorAll('.friend-item').forEach(item => {
+      const friendName = item.querySelector('.friend-name').textContent.toLowerCase();
+      if (friendName.includes(searchTerm)) {
+        item.style.display = 'block';
+      } else {
+        item.style.display = 'none';
+      }
+    });
+  });
+
+  // Confirmation Button Event
+  document.getElementById('confirmButton').addEventListener('click', function() {
+    if (friendToRemove) {
+      window.location.href = `/remove_friend/${friendToRemove}`;
+    }
+  });
+  
+  // Auto-hide flash messages
+  setTimeout(() => {
+    const flashMessages = document.querySelectorAll('.animate-fade-in');
+    flashMessages.forEach(message => {
+      message.style.animation = 'fadeOut 0.3s ease-in-out forwards';
+      setTimeout(() => message.remove(), 300);
+    });
+  }, 5000);
+</script>
+{% endblock %}
