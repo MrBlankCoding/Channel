@@ -2,12 +2,46 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <title>LearnMath</title>
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Channel</title>
+    <!-- Meta tag for responsive design -->
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Channel is a simple modern chatroom based messaging app" >
+    <!-- Favicon -->
     <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
   </head>
+  
   <body>
-    <div class="content">{% block content %} {% endblock %}</div>
+    <div class="content">
+      {% block content %} 
+      {% endblock %}
+    </div>
   </body>
+
+  <!-- Firebase SDK (Using v10) -->
+  <script type="module">
+    // Import Firebase services as modules
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
+    import { getAuth } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
+    import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-analytics.js";
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyCjJzQGCZ0niMD5tek_0gLSBGJXxW0VLKA",
+      authDomain: "channelchat-7d679.firebaseapp.com",
+      projectId: "channelchat-7d679",
+      storageBucket: "channelchat-7d679.appspot.com",
+      messagingSenderId: "822894243205",
+      appId: "1:822894243205:web:e129bcac94601e183e68ec",
+      measurementId: "G-PL15EEFQDE"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
+    const analytics = getAnalytics(app); // Optional
+    const auth = getAuth(app);  // Initialize Auth
+
+    // You can add more Firebase products/services as needed
+  </script>
 </html>

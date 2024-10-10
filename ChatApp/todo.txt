@@ -13,3 +13,9 @@
 16. Anything else I think of
 17. CRSF PROTECTION
 18. Make it so when you click on the join room button you actually join the room
+19. Make a leave room button
+20. Make a heartbeat system for users being online
+21. Add support for room names
+22. Make delete message modal
+23. Add reaction menu above message
+24. Move reactions to the top corner of the message
